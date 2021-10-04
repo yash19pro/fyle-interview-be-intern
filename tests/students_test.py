@@ -1,3 +1,23 @@
+def test_is_server_active(client):
+    """Added this test to check if the server has started"""
+    response = client.get(
+        "/"
+    )
+
+    assert response.status_code == 200
+
+
+def test_no_headers_request(client):
+    response = client.get(
+        '/student/assignments',
+    )
+
+    assert response.status_code == 401
+
+    data = response.json
+    assert data['error'] == 'FyleError'
+
+
 def test_get_assignments_student_1(client, h_student_1):
     response = client.get(
         '/student/assignments',
@@ -57,3 +77,22 @@ def test_submit_assignment_student_1(client, h_student_1):
     assert data['student_id'] == 1
     assert data['state'] == 'SUBMITTED'
     assert data['teacher_id'] == 2
+
+
+def test_modify_assignment_student_1(client, h_student_1):
+    content = "Hello! This is a new content file!"
+
+    response = client.post(
+        '/student/assignments',
+        headers=h_student_1,
+        json={
+            'content': content,
+            "id": 5
+        })
+
+    assert response.status_code == 200
+
+    data = response.json['data']
+    assert data['content'] == content
+    assert data['state'] == 'DRAFT'
+    assert data['teacher_id'] is None

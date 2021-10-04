@@ -75,5 +75,25 @@ class Assignment(db.Model):
         return assignment
 
     @classmethod
+    def grade_assignment(cls, _id, grade, p):
+        assignment = Assignment.get_by_id(_id)
+        assertions.assert_found(assignment)
+        assertions.assert_found(assignment.teacher_id)
+        assertions.assert_valid(assignment.teacher_id == p.teacher_id)
+        if assignment.state == AssignmentStateEnum.DRAFT or assignment.state == AssignmentStateEnum.GRADED:
+            assertions.base_assert(400, "BAD_REQUEST")
+        # assertions.assert_valid(assignment.state == AssignmentStateEnum.SUBMITTED)
+
+        assignment.state = AssignmentStateEnum.GRADED
+        assignment.grade = GradeEnum[grade]
+        db.session.flush()
+
+        return assignment
+
+    @classmethod
     def get_assignments_by_student(cls, student_id):
         return cls.filter(cls.student_id == student_id).all()
+
+    @classmethod
+    def get_assignments_by_teacher(cls, teacher_id):
+        return cls.filter(cls.teacher_id == teacher_id).all()

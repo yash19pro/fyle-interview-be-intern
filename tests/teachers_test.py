@@ -100,3 +100,29 @@ def test_grade_assignment_draft_assignment(client, h_teacher_1):
     data = response.json
 
     assert data['error'] == 'FyleError'
+
+def test_grade_assignment(client, h_teacher_2):
+    """Added this test to check whether a teacher can successfully grade an assignment"""
+    response = client.post(
+        '/teacher/assignments/grade',
+        headers=h_teacher_2,
+        json={
+            "id": 3,
+            "grade": "A"
+        }
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+
+    assert data["grade"] == "A"
+    assert data["state"] == "GRADED"
+
+
+def no_headers_request(client):
+    respose = client.get('/teacher/assignments')
+
+    assert respose.status_code == 401
+
+    data = respose.json
+    assert data['error'] == 'FyleError'
